@@ -63,6 +63,9 @@ class UnshortenIt(object):
                 return uri, 200
             r = requests.head(uri, headers=self._headers, timeout=self._timeout)
             while True:
+                if r.status_code == 301:
+                    return r.url, r.status_code
+
                 if 'location' in r.headers:
                     r = requests.head(r.headers['location'])
                     uri = r.url
