@@ -31,6 +31,7 @@ class UnshortenIt(object):
     _lnxlu_regex = r'lnx\.lu'
     _shst_regex = r'sh\.st'
     _this_dir, _this_filename = os.path.split(__file__)
+    _maxretries = 5
     _timeout = 10
 
     def unshorten(self, uri, type=None, timeout=10):
@@ -62,10 +63,12 @@ class UnshortenIt(object):
                 uri = re.findall(r'.*url\=(.*?)\"\.*',r.text)[0]
                 return uri, 200
             r = requests.head(uri, headers=self._headers, timeout=self._timeout)
+            retries = 0
             while True:
-                if 'location' in r.headers:
+                if 'location' in r.headers and retries < _maxretries:
                     r = requests.head(r.headers['location'])
                     uri = r.url
+                    retries = retries + 1
                 else:
                     return r.url, r.status_code
 
